@@ -1,115 +1,13 @@
 from tkinter import *
 import tkintermapview
-import requests
-from bs4 import BeautifulSoup
 
-users: list = []
-
-
-class User:
-    def __init__(self, imie: str, nazwisko: str, posty: int, lokalizacja: str):
-        self.imie = imie
-        self.nazwisko = nazwisko
-        self.posty = posty
-        self.lokalizacja = lokalizacja
-        self.coordinates = User.get_coordinates(self)
-
-        self.marker = map_widget.set_marker(self.coordinates[0], self.coordinates[1], text=self.imie)
-
-    def get_coordinates(self) -> list:
-        url = f"https://pl.wikipedia.org/wiki/{self.lokalizacja}"
-        response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response_html = BeautifulSoup(response.text, 'html.parser')
-        latitude = float(response_html.select(".latitude")[1].text.replace(",", "."))
-        longitude = float(response_html.select(".longitude")[1].text.replace(",", "."))
-        return [latitude, longitude]
-
-
-def show_users() -> None:
-    listbox_lista_obiektow.delete(0, END)
-    for idx, user in enumerate(users):
-        listbox_lista_obiektow.insert(idx, user.imie)
-
-
-def remove_user() -> None:
-    i = listbox_lista_obiektow.index(ACTIVE)
-    users[i].marker.delete()
-    users.pop(i)
-    show_users()
-
-
-def show_user_details():
-    i = listbox_lista_obiektow.index(ACTIVE)
-    imie = users[i].imie
-    nazwisko = users[i].nazwisko
-    posty = users[i].posty
-    lokalizacja = users[i].lokalizacja
-
-    label_imie_szczegoly_obiektu_wartosc.config(text=imie)
-    label_nazwisko_szczegoly_obiektu_wartosc.config(text=nazwisko)
-    label_liczba_postow_szczegoly_obiektu_wartosc.config(text=posty)
-    label_lokalizacja_szczegoly_obiektu_wartosc.config(text=lokalizacja)
-    map_widget.set_position(users[i].coordinates[0], users[i].coordinates[1])
-    map_widget.set_zoom(12)
-
-
-def edit_user():
-    i = listbox_lista_obiektow.index(ACTIVE)
-    imie = users[i].imie
-    nazwisko = users[i].nazwisko
-    posty = users[i].posty
-    lokalizacja = users[i].lokalizacja
-
-    entry_imie.insert(0, imie)
-    entry_nazwisko.insert(0, nazwisko)
-    entry_liczba_postow.insert(0, posty)
-    entry_lokalizacja.insert(0, lokalizacja)
-
-    button_dodaj_uzytkownika.config(text="Zapisz zmiany", command=lambda: update_user(i))
-
-
-def update_user(i):
-    users[i].imie = entry_imie.get()
-    users[i].nazwisko = entry_nazwisko.get()
-    users[i].posty = entry_liczba_postow.get()
-    users[i].lokalizacja = entry_lokalizacja.get()
-    users[i].coordinates = User.get_coordinates(users[i])
-    users[i].marker.delete()
-    users[i].marker = map_widget.set_marker(users[i].coordinates[0], users[i].coordinates[1], text=users[i].imie)
-
-    button_dodaj_uzytkownika.config(text="Dodaj uzytkownika", command=add_user)
-    entry_imie.delete(0, END)
-    entry_nazwisko.delete(0, END)
-    entry_liczba_postow.delete(0, END)
-    entry_lokalizacja.delete(0, END)
-
-    entry_imie.focus()
-    show_users()
-
-
-def add_user():
-    name = entry_imie.get()
-    surname = entry_nazwisko.get()
-    posts = entry_liczba_postow.get()
-    lokalizacja = entry_lokalizacja.get()
-
-    # print(name, surname, posts, lokalizacja)
-    new_user = User(imie=name, nazwisko=surname, posty=int(posts), lokalizacja=lokalizacja)
-    users.append(new_user)
-    # print(users)
-
-    entry_imie.delete(0, END)
-    entry_nazwisko.delete(0, END)
-    entry_liczba_postow.delete(0, END)
-    entry_lokalizacja.delete(0, END)
-
-    entry_imie.focus()
-    show_users()
+from CRUD_lib.model import User
+from CRUD_lib.controler import (init_controller, show_users, remove_user, show_user_details, edit_user, add_user, add_user_object)
 
 
 root = Tk()
 
-root.title("Mapbook_AB")
+root.title("Mapa znajomych")
 root.geometry("1024x760")
 
 # FRAME
@@ -192,5 +90,12 @@ map_widget.set_zoom(6)
 map_widget.set_position(52.2, 21.0)
 
 map_widget.grid(row=0, column=0)
+
+init_controller(listbox=listbox_lista_obiektow, entry_name=entry_imie,
+    entry_surname=entry_nazwisko, entry_posts=entry_liczba_postow, entry_location=entry_lokalizacja,
+    button_add=button_dodaj_uzytkownika, label_name_value=label_imie_szczegoly_obiektu_wartosc,
+    label_surname_value=label_nazwisko_szczegoly_obiektu_wartosc, label_posts_value=label_liczba_postow_szczegoly_obiektu_wartosc,
+    label_location_value=label_lokalizacja_szczegoly_obiektu_wartosc, map_view=map_widget
+)
 
 root.mainloop()
