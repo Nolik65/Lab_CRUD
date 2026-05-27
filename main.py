@@ -98,7 +98,7 @@ init_controller(listbox=listbox_lista_obiektow, entry_name=entry_imie,
     label_location_value=label_lokalizacja_szczegoly_obiektu_wartosc, map_view=map_widget
 )
 
-add_user_object(User(imie="Jakub", nazwisko="Jakubowski", posty=2, lokalizacja="Mińsk_Mazowiecki"))
+add_user_object(User(imie="Jakub", nazwisko="Jakubowski", posty=2, lokalizacja="Warszawa"))
 add_user_object(User(imie="Jan", nazwisko="Kowalski", posty=10, lokalizacja="Bydgoszcz"))
 add_user_object(User(imie="Adam", nazwisko="Mickiewicz", posty=25, lokalizacja="Wilno"))
 
